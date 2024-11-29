@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -8,36 +10,44 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final List<Map<String, dynamic>> servicos = [
-    {
-      "titulo": "Corte de cabelo",
-      "descricao":
-          "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
-      "preco": 50.50,
-      "imagem": "https://via.placeholder.com/150"
-    },
-    {
-      "titulo": "Manicure e Pedicure",
-      "descricao":
-          "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-      "preco": 30,
-      "imagem": "https://via.placeholder.com/150"
-    },
-    {
-      "titulo": "Mecanico",
-      "descricao":
-          " It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-      "preco": 65.90,
-      "imagem": "https://via.placeholder.com/150"
-    },
-    {
-      "titulo": "Aula de Informatica",
-      "descricao":
-          "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.",
-      "preco": 160.00,
-      "imagem": "https://via.placeholder.com/150"
-    }
-  ];
+  List<dynamic> servicos = [];
+  bool isloading = true;
+
+  @override
+  void initState() {
+        super.initState();
+        LIstaServicos();
+  }
+
+  Future <void> LIstaServicos () async {
+
+    try{
+      final  response = 
+      await http.get(Uri.parse('http://10.56.45.30/public/api/servicos'));
+
+      if(response.statusCode == 200){
+          setState(() {
+  servicos = json.decode(response.body);
+  isloading = true;
+});
+      }
+    }catch(e){ 
+      mostrarError('Erro: $e');
+
+     }
+  }
+
+  void mostrarError(String mensagem){
+    setState(() {
+      isloading = false;
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(mensagem),
+      ),
+    );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +97,11 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      body: ListView.builder(
+      body: isloading 
+      ? const Center(
+        child: CircularProgressIndicator(),
+      ) 
+       :ListView.builder(
         itemCount: servicos.length,
         itemBuilder: (context, index) {
           final servico = servicos[index];
@@ -97,7 +111,7 @@ class _HomePageState extends State<HomePage> {
             child: Row(
               children: [
                 Image.network(
-                  servico['imagem'],
+                  servico['fotos'][0]['imagem'],
                   width: 100,
                   height: 100,
                   fit: BoxFit.cover,
@@ -119,7 +133,7 @@ class _HomePageState extends State<HomePage> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        'R\$ ${servico['preco'].toStringAsFixed(2)}',
+                        'R\$ ${double.parse(servico['valor']).toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
