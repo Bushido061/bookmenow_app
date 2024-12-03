@@ -1,3 +1,4 @@
+import 'package:bookmenow/detalhe_servicos_page.dart';
 import 'package:bookmenow/home_page.dart';
 import 'package:flutter/material.dart';
  

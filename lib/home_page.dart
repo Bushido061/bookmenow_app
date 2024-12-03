@@ -105,7 +105,16 @@ class _HomePageState extends State<HomePage> {
         itemCount: servicos.length,
         itemBuilder: (context, index) {
           final servico = servicos[index];
-          return Card(
+          return GestureDetector(
+            onTap: (){
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const DetalhesServicosPage() 
+                  ),
+              );
+            },
+            child:Card(
             margin: const EdgeInsets.all(8.0),
             color: const Color(0xFFfcfcfc),
             child: Row(
