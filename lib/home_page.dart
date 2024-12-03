@@ -1,59 +1,57 @@
+import 'package:bookmenow/detalhe_servicos_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+ 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-
+ 
   @override
   State<HomePage> createState() => _HomePageState();
 }
-
+ 
 class _HomePageState extends State<HomePage> {
   List<dynamic> servicos = [];
-  bool isloading = true;
-
+  bool isLoading = true;
+ 
   @override
   void initState() {
-        super.initState();
-        LIstaServicos();
+    super.initState();
+    listaServicos();
   }
-
-  Future <void> LIstaServicos () async {
-
-    try{
-      final  response = 
-      await http.get(Uri.parse('http://10.56.45.30/public/api/servicos'));
-
-      if(response.statusCode == 200){
-          setState(() {
-  servicos = json.decode(response.body);
-  isloading = true;
-});
+ 
+  Future<void> listaServicos() async {
+    try {
+      final response =
+          await http.get(Uri.parse('http://10.56.45.36/public/api/servicos'));
+ 
+      if (response.statusCode == 200) {
+        setState(() {
+          servicos = json.decode(response.body);
+          isLoading = false;
+        });
       }
-    }catch(e){ 
+    } catch (e) {
       mostrarError('Erro: $e');
-
-     }
+    }
   }
-
-  void mostrarError(String mensagem){
+ 
+  void mostrarError(String mensagem) {
     setState(() {
-      isloading = false;
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(mensagem),
-      ),
-    );
+      isLoading = false;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(mensagem),
+        ),
+      );
     });
   }
-
+ 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("BookMeNow"),
+        title: const Text("BookMeNow"),
         centerTitle: true,
         backgroundColor: Colors.white,
       ),
@@ -67,9 +65,9 @@ class _HomePageState extends State<HomePage> {
                 decoration: BoxDecoration(
                   color: Colors.orange,
                 ),
-                padding: EdgeInsets.symmetric(vertical: 30, horizontal: 16),
+                padding: EdgeInsets.symmetric(vertical: 28, horizontal: 16),
                 child: Text(
-                  "Olá, Hudson",
+                  "Olá, Edson",
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -79,8 +77,8 @@ class _HomePageState extends State<HomePage> {
             ),
             ListTile(
               leading: Icon(Icons.login),
-              title: Text("Login"),
               // trailing: Icon(Icons.login),
+              title: Text("Login"),
             ),
             ListTile(
               leading: Icon(Icons.list),
@@ -90,6 +88,7 @@ class _HomePageState extends State<HomePage> {
               leading: Icon(Icons.help),
               title: Text("Dúvidas"),
             ),
+            Divider(),
             ListTile(
               leading: Icon(Icons.info),
               title: Text("Sobre o BookMeNow"),
@@ -97,65 +96,71 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      body: isloading 
-      ? const Center(
-        child: CircularProgressIndicator(),
-      ) 
-       :ListView.builder(
-        itemCount: servicos.length,
-        itemBuilder: (context, index) {
-          final servico = servicos[index];
-          return GestureDetector(
-            onTap: (){
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const DetalhesServicosPage() 
-                  ),
-              );
-            },
-            child:Card(
-            margin: const EdgeInsets.all(8.0),
-            color: const Color(0xFFfcfcfc),
-            child: Row(
-              children: [
-                Image.network(
-                  servico['fotos'][0]['imagem'],
-                  width: 100,
-                  height: 100,
-                  fit: BoxFit.cover,
-                ),
-                Expanded(
-                  child: Column(
-                    children: [
-                      Text(
-                        servico['titulo'],
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: servicos.length,
+              itemBuilder: (context, index) {
+                final servico = servicos[index];
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DetalheServicosPage(
+                          servico: servico,
+                        )
+                      )
+                    );
+                  },
+                  child: Card(
+                    elevation: 0.5,
+                    margin: const EdgeInsets.all(8.0),
+                    color: const Color(0xFFfcfcfc),
+                    child: Row(
+                      children: [
+                        Image.network(
+                          servico['fotos'][0]['imagem'],
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
                         ),
-                        textAlign: TextAlign.left,
-                      ),
-                      Text(
-                        servico['descricao'],
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        'R\$ ${double.parse(servico['valor']).toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  servico['titulo'],
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.left,
+                                ),
+                                Text(
+                                  servico['descricao'],
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  'R\$ ${double.parse(servico['valor']).toStringAsFixed(2)}',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
                   ),
-                )
-              ],
+                );
+              },
             ),
-          );
-        },
-      ),
     );
   }
 }
